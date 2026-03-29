@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Doctor {
+  id              String         @id @default(cuid())
+  name            String
+  specialty       String
+  qualifications  String
+  experience      Int
+  consultationFee Int
+  rating          Float
+  reviewCount     Int
+  availableToday  Boolean        @default(false)
+  photoUrl        String
+  city            String
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  availability    Availability[]
+  appointments    Appointment[]
+}
+
+model Availability {
+  id           String   @id @default(cuid())
+  doctorId     String
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  slotDuration Int      @default(30)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  doctor       Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id              String   @id @default(cuid())
+  doctorId        String
+  appointmentDate String
+  slotTime        String
+  patientName     String
+  patientAge      Int
+  patientGender   String
+  patientPhone    String
+  reason          String?
+  forSelf         Boolean  @default(true)
+  paymentMethod   String
+  status          String   @default("confirmed")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  doctor          Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, appointmentDate, slotTime])
+}

@@ -1,0 +1,15 @@
+export {
+  createAppointment,
+  createDoctor,
+  deleteDoctor,
+  fetchAdminAppointments,
+  fetchAdminDashboard,
+  fetchAdminDoctors,
+  fetchDoctorAvailability,
+  fetchDoctorById as getDoctorById,
+  fetchDoctors as getDoctors,
+  fetchDoctorSlots as getDoctorSlots,
+  updateAppointmentStatus,
+  updateDoctor,
+  updateDoctorAvailability,
+} from "@/lib/api";

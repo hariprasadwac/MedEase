@@ -20,6 +20,15 @@
 # production
 /build
 
+# backend
+backend/node_modules/
+backend/.cache/
+backend/.vite/
+backend/prisma/*.db
+
+# local artifacts
+test-results/
+
 # misc
 .DS_Store
 *.pem
