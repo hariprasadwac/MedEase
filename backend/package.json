@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --config vitest.config.mjs",
     "db:generate": "prisma generate",
+    "prisma:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx src/seed.ts"
   },
