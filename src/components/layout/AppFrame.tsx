@@ -17,16 +17,11 @@ export function AppFrame({ children }: AppFrameProps) {
       {hideDefaultHeader ? null : (
         <header className="sticky top-0 z-40 border-b border-white/70 bg-white/85 backdrop-blur-xl">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
-            <Link href="/doctors" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-lg shadow-blue-600/30">
-                M
-              </div>
-              <div>
-                <p className="font-[family-name:var(--font-jakarta)] text-lg font-bold">
-                  MedEase
-                </p>
-                <p className="text-xs text-slate-500">City-aware care booking</p>
-              </div>
+            <Link
+              href="/doctors"
+              className="font-[family-name:var(--font-jakarta)] text-2xl font-extrabold tracking-[-1.2px] text-[#1d4ed8]"
+            >
+              MedEase
             </Link>
             <div className="flex items-center gap-3">
               <Link

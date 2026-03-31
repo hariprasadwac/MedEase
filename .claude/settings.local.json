@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_figma_figma__get_design_context",
+      "mcp__plugin_figma_figma__get_screenshot",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(ls:*)",
+      "Bash(curl -s http://localhost:3000/api/doctors)",
+      "Bash(curl -s -X POST http://localhost:3000/api/admin/doctors -H \"Content-Type: application/json\" -d '{\"\"\"\"name\"\"\"\":\"\"\"\"Test\"\"\"\",\"\"\"\"specialty\"\"\"\":\"\"\"\"General\"\"\"\",\"\"\"\"qualifications\"\"\"\":\"\"\"\"MBBS\"\"\"\",\"\"\"\"experience\"\"\"\":5,\"\"\"\"consultationFee\"\"\"\":500,\"\"\"\"rating\"\"\"\":4.5,\"\"\"\"reviewCount\"\"\"\":10,\"\"\"\"availableToday\"\"\"\":false,\"\"\"\"photoUrl\"\"\"\":\"\"\"\"https://example.com/photo.jpg\"\"\"\",\"\"\"\"city\"\"\"\":\"\"\"\"Mumbai\"\"\"\",\"\"\"\"isActive\"\"\"\":true,\"\"\"\"availability\"\"\"\":[]}')",
+      "Bash(python -c \"import sys,json; d=sys.stdin.read\\(\\); print\\(d[:2000]\\)\")",
+      "mcp__ide__getDiagnostics"
+    ]
+  }
+}

@@ -5,34 +5,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Bell,
-  CalendarDays,
   ChevronDown,
-  CircleHelp,
   Clock3,
-  Heart,
-  LayoutGrid,
   MapPin,
-  Menu,
-  MessageSquare,
   Search,
-  Settings,
   Star,
   Stethoscope,
-  UserRound,
   Wallet,
 } from "lucide-react";
 import { DoctorsPageSkeleton } from "@/components/skeletons/DoctorsPageSkeleton";
 import { cities, getDoctorSearchScore, matchesDoctorFilters, specialties } from "@/lib/booking";
 import { getDoctors } from "@/lib/doctors";
 import type { Doctor, Specialty } from "@/types";
-
-const mobileNavItems = [
-  { label: "Home", icon: LayoutGrid },
-  { label: "Appointments", icon: CalendarDays },
-  { label: "Search", icon: Search, active: true },
-  { label: "Profile", icon: UserRound },
-];
 
 const specialtyLabels: Record<"All" | Specialty, string> = {
   All: "All",
@@ -48,6 +32,8 @@ const mobileSpecialtyLabels: Record<"All" | Specialty, string> = {
   Ortho: "Ortho",
   Gynaecology: "Gynaecology",
 };
+
+const DOCTOR_PLACEHOLDER = "/doctor-placeholder.svg";
 
 function formatFee(amount: number) {
   return `INR ${amount}`;
@@ -65,7 +51,7 @@ function DesktopDoctorCard({ doctor }: { doctor: Doctor }) {
       <div className="mb-6 flex items-start justify-between">
         <div className="relative h-20 w-20 overflow-hidden rounded-full ring-4 ring-[#f8fafc]">
           <Image
-            src={doctor.photoUrl}
+            src={doctor.photoUrl || DOCTOR_PLACEHOLDER}
             alt={doctor.name}
             fill
             sizes="80px"
@@ -131,23 +117,11 @@ function MobileDoctorCard({ doctor }: { doctor: Doctor }) {
   const router = useRouter();
 
   return (
-    <article className="relative rounded-[40px] bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
-      {doctor.availableToday ? (
-        <div
-          data-testid="available-today-badge"
-          className="absolute right-6 top-6 inline-flex items-center gap-1.5 rounded-full bg-[#006860]/10 px-3 py-1"
-        >
-          <span className="h-2 w-2 rounded-full bg-[#006860]" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.5px] text-[#006860]">
-            Available Today
-          </span>
-        </div>
-      ) : null}
-
+    <article className="rounded-[40px] bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
       <div className="mb-6 flex items-start gap-5">
         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-4 ring-[#f2f4f6]">
           <Image
-            src={doctor.photoUrl}
+            src={doctor.photoUrl || DOCTOR_PLACEHOLDER}
             alt={doctor.name}
             fill
             sizes="80px"
@@ -155,11 +129,22 @@ function MobileDoctorCard({ doctor }: { doctor: Doctor }) {
           />
         </div>
         <div className="min-w-0 flex-1 pt-1">
-          <div className="mb-2 flex items-center gap-1.5 text-[#191c1e]">
+          <div className="mb-1.5 flex items-center gap-1.5 text-[#191c1e]">
             <Star className="h-[14px] w-[14px] fill-[#f6bf24] text-[#f6bf24]" />
             <span className="text-[16px] font-bold leading-6">{doctor.rating.toFixed(1)}</span>
             <span className="text-[12px] leading-4 text-[#414754]">({doctor.reviewCount} reviews)</span>
           </div>
+          {doctor.availableToday ? (
+            <div
+              data-testid="available-today-badge"
+              className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#006860]/10 px-3 py-1"
+            >
+              <span className="h-2 w-2 rounded-full bg-[#006860]" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.5px] text-[#006860]">
+                Available Today
+              </span>
+            </div>
+          ) : null}
           <h2 className="truncate font-[family-name:var(--font-jakarta)] text-[20px] font-bold leading-[25px] text-[#191c1e]">
             {doctor.name}
           </h2>
@@ -190,7 +175,7 @@ function MobileDoctorCard({ doctor }: { doctor: Doctor }) {
       <button
         type="button"
         onClick={() => router.push(`/booking?doctorId=${doctor.id}`)}
-        className="flex h-14 items-center justify-center rounded-2xl bg-[#d8e2ff] text-[16px] font-bold text-[#26467c]"
+        className="flex h-14 w-full items-center justify-center rounded-2xl bg-[#e6e8ea] text-[16px] font-bold text-[#0059bb]"
       >
         Book Appointment
       </button>
@@ -201,7 +186,6 @@ function MobileDoctorCard({ doctor }: { doctor: Doctor }) {
 export function DoctorsPageClient() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDesktop, setIsDesktop] = useState(false);
   const [searchDraft, setSearchDraft] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [cityDraft, setCityDraft] = useState<(typeof cities)[number]>("All Cities");
@@ -228,19 +212,6 @@ export function DoctorsPageClient() {
     };
   }, []);
 
-  useEffect(() => {
-    function syncViewport() {
-      setIsDesktop(window.innerWidth >= 1024);
-    }
-
-    syncViewport();
-    window.addEventListener("resize", syncViewport);
-
-    return () => {
-      window.removeEventListener("resize", syncViewport);
-    };
-  }, []);
-
   const filteredDoctors = doctors
     .filter((doctor) => matchesDoctorFilters(doctor, searchQuery, cityFilter, specialtyFilter))
     .sort((left, right) => {
@@ -263,15 +234,14 @@ export function DoctorsPageClient() {
     setCityFilter(cityDraft);
   }
 
-  const featuredDoctor = doctors[0];
-
   if (loading) {
     return <DoctorsPageSkeleton />;
   }
 
   return (
     <div className="min-h-screen bg-[#f7f9fb] text-[#191c1e]">
-      {isDesktop ? (
+      {/* ── Desktop layout ── */}
+      <div className="hidden lg:block">
         <>
           <header className="fixed inset-x-0 top-0 z-40 border-b border-[#f1f5f9] bg-white/80 backdrop-blur-[10px]">
           <div className="mx-auto flex h-20 w-full max-w-[1440px] items-center justify-between px-8">
@@ -288,7 +258,7 @@ export function DoctorsPageClient() {
         </header>
 
         <div className="mx-auto w-full max-w-[1440px] px-8 py-12 pt-[128px]">
-          <div className="mx-auto max-w-[1152px]">
+          <div>
               <section>
                 <h1 className="font-[family-name:var(--font-jakarta)] text-[36px] font-extrabold tracking-[-0.9px] text-[#191c1e]">
                   Find Your Specialist
@@ -404,29 +374,18 @@ export function DoctorsPageClient() {
           </div>
         </footer>
         </>
-      ) : (
+      </div>
+
+      {/* ── Mobile layout ── */}
+      <div className="lg:hidden">
         <>
           <header className="fixed inset-x-0 top-0 z-40 border-b border-[#f1f5f9] bg-white/80 backdrop-blur-[12px]">
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center gap-3">
-              <div className="relative h-10 w-10 overflow-hidden rounded-full bg-[#d8e2ff]">
-                <Image
-                  src={featuredDoctor?.photoUrl ?? "/next.svg"}
-                  alt="User profile"
-                  fill
-                  sizes="40px"
-                  className="object-cover"
-                />
-              </div>
-              <p className="text-[18px] font-bold tracking-[-0.45px] text-[#191c1e]">MedEase</p>
-            </div>
-            <button type="button" aria-label="Open menu" className="text-[#1d4ed8]">
-              <Menu className="h-5 w-5" />
-            </button>
+          <div className="flex items-center px-6 py-4">
+            <p className="font-[family-name:var(--font-jakarta)] text-[20px] font-extrabold tracking-[-0.5px] text-[#1d4ed8]">MedEase</p>
           </div>
         </header>
 
-        <div className="px-6 pb-44 pt-24">
+        <div className="px-6 pb-10 pt-24">
           <section>
             <h1 className="font-[family-name:var(--font-jakarta)] text-[36px] font-extrabold leading-[45px] tracking-[-0.9px] text-[#191c1e]">
               Find the specialized
@@ -518,36 +477,8 @@ export function DoctorsPageClient() {
           </section>
         </div>
 
-        <nav className="fixed inset-x-0 bottom-0 z-40 rounded-t-[32px] bg-white/90 px-4 pb-8 pt-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] backdrop-blur-[20px]">
-          <div className="flex items-center justify-between">
-            {mobileNavItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.label}
-                  className={`flex min-w-[68px] flex-col items-center rounded-2xl px-5 py-2 ${
-                    item.active ? "bg-[#eff6ff]" : ""
-                  }`}
-                >
-                  <Icon
-                    className={`h-[18px] w-[18px] ${
-                      item.active ? "text-[#1d4ed8]" : "text-[#64748b]"
-                    }`}
-                  />
-                  <span
-                    className={`mt-1 text-[11px] font-semibold uppercase tracking-[0.55px] ${
-                      item.active ? "text-[#1d4ed8]" : "text-[#64748b]"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </nav>
         </>
-      )}
+      </div>
     </div>
   );
 }

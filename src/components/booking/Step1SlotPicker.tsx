@@ -35,7 +35,7 @@ export function Step1SlotPicker({
   };
 
   return (
-    <section className="w-full space-y-8">
+    <section className="min-w-0 w-full space-y-8">
       <div>
         <h2 className="font-[family-name:var(--font-jakarta)] text-[30px] font-extrabold tracking-[-0.75px] text-[#191c1e] lg:text-[36px] lg:tracking-[-0.9px]">
           <span className="lg:hidden">Pick a time</span>
@@ -106,7 +106,7 @@ export function Step1SlotPicker({
                 {label} {label === "Morning" ? "" : "Slots"}
               </h3>
             </div>
-            <div className="grid grid-cols-3 gap-3 lg:grid-cols-4">
+            <div className="grid grid-cols-3 gap-2 lg:grid-cols-4 lg:gap-3">
               {slots.map((slot) => {
                 const isBooked = !availableSlots.includes(slot);
                 const isSelected = selectedSlot === slot;
@@ -120,7 +120,7 @@ export function Step1SlotPicker({
                     disabled={isBooked}
                     onClick={() => onSlotSelect(slot)}
                     className={cn(
-                      "min-h-[46px] rounded-[12px] border px-3 py-3 text-[14px] font-semibold transition lg:min-h-[50px] lg:text-[16px] lg:font-bold",
+                      "min-h-[46px] w-full rounded-[12px] border px-2 py-3 text-[13px] font-semibold transition lg:min-h-[50px] lg:px-3 lg:text-[16px] lg:font-bold",
                       isBooked &&
                         "cursor-not-allowed border-transparent bg-[#eceef0] text-[rgba(65,71,84,0.5)] line-through",
                       !isBooked &&

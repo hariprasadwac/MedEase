@@ -63,7 +63,7 @@ export function Step3Confirm({
       <div className="rounded-[28px] bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
         <div className="flex items-start gap-4">
           <div className="relative h-16 w-16 overflow-hidden rounded-full ring-4 ring-[#f2f4f6]">
-            <Image src={doctor.photoUrl} alt={doctor.name} fill sizes="64px" className="object-cover" />
+            <Image src={doctor.photoUrl || "/doctor-placeholder.svg"} alt={doctor.name} fill sizes="64px" className="object-cover" />
           </div>
           <div className="space-y-1">
             <h3 className="font-[family-name:var(--font-jakarta)] text-[20px] font-bold text-[#191c1e]">

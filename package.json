@@ -3,25 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm --prefix backend run dev\" \"next dev\"",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit && npm --prefix backend run typecheck",
-    "test": "vitest run --coverage --config vitest.config.mjs && npm --prefix backend run test",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage --config vitest.config.mjs",
     "test:watch": "vitest --config vitest.config.mjs",
     "test:e2e": "playwright test",
-    "postinstall": "npm --prefix backend install && npm --prefix backend run prisma:generate",
-    "db:generate": "npm --prefix backend run db:generate",
-    "db:push": "npm --prefix backend run db:push",
-    "db:seed": "npm --prefix backend run db:seed",
-    "ci": "npm run db:generate && npm run db:push && npm run lint && npm run typecheck && npm run test && npm run build && npm run test:e2e"
+    "seed:firestore": "tsx src/lib/seed-firestore.ts",
+    "ci": "npm run lint && npm run typecheck && npm run test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "clsx": "^2.1.1",
-    "concurrently": "^9.2.1",
     "date-fns": "^4.1.0",
     "firebase": "^12.11.0",
+    "firebase-admin": "^13.7.0",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
     "next": "16.2.1",
@@ -47,6 +44,8 @@
     "playwright": "^1.58.2",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.2",
+    "tsx": "^4.19.2",
+    "dotenv": "^16.5.0"
   }
 }

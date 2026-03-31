@@ -56,7 +56,7 @@ export function BookingPageSkeleton() {
           </div>
         </header>
 
-        <div className="mx-auto w-full max-w-[1152px] px-6 pb-16 pt-28 lg:px-8">
+        <div className="mx-auto w-full max-w-[1440px] px-6 pb-16 pt-28 lg:px-8">
           <Skeleton height={48} width="100%" borderRadius={999} />
           <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="rounded-[32px] bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">

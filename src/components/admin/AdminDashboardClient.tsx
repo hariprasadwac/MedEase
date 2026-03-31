@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Building2, CalendarClock, Stethoscope, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { AdminDashboardSkeleton } from "@/components/skeletons/AdminDashboardSkeleton";
 import {
   createDoctor,
   deleteDoctor,
@@ -114,7 +115,7 @@ export function AdminDashboardClient() {
   };
 
   if (loading && !stats) {
-    return <div className="px-4 py-10 text-slate-500">Loading admin dashboard...</div>;
+    return <AdminDashboardSkeleton />;
   }
 
   return (
@@ -127,7 +128,7 @@ export function AdminDashboardClient() {
           Manage doctors, timings, and live bookings.
         </h1>
         <p className="mt-3 max-w-2xl text-slate-300">
-          This admin area runs inside the main app and controls the Node backend data directly.
+          This admin area runs inside the main app and controls the Firebase Firestore data directly.
         </p>
       </section>
 
@@ -165,107 +166,143 @@ export function AdminDashboardClient() {
           </div>
 
           <div className="mt-6 grid gap-4">
-            <input
-              placeholder="Doctor name"
-              value={doctorForm.name}
-              onChange={(event) => setDoctorForm({ ...doctorForm, name: event.target.value })}
-              className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
-            />
-            <select
-              value={doctorForm.specialty}
-              onChange={(event) =>
-                setDoctorForm({
-                  ...doctorForm,
-                  specialty: event.target.value as Specialty,
-                })
-              }
-              className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
-            >
-              {specialties.filter((item) => item !== "All").map((specialty) => (
-                <option key={specialty} value={specialty}>
-                  {specialty}
-                </option>
-              ))}
-            </select>
-            <input
-              placeholder="Qualifications"
-              value={doctorForm.qualifications}
-              onChange={(event) =>
-                setDoctorForm({ ...doctorForm, qualifications: event.target.value })
-              }
-              className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
-            />
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Full Name *</label>
               <input
-                placeholder="Experience"
-                type="number"
-                value={doctorForm.experience}
-                onChange={(event) =>
-                  setDoctorForm({ ...doctorForm, experience: Number(event.target.value) })
-                }
+                placeholder="e.g. Dr. Aisha Kapoor"
+                value={doctorForm.name}
+                onChange={(event) => setDoctorForm({ ...doctorForm, name: event.target.value })}
                 className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
               />
-              <input
-                placeholder="Consultation fee"
-                type="number"
-                value={doctorForm.consultationFee}
+            </div>
+            <div className="grid gap-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Specialty *</label>
+              <select
+                value={doctorForm.specialty}
                 onChange={(event) =>
-                  setDoctorForm({ ...doctorForm, consultationFee: Number(event.target.value) })
+                  setDoctorForm({
+                    ...doctorForm,
+                    specialty: event.target.value as Specialty,
+                  })
                 }
                 className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
-              />
+              >
+                {specialties.filter((item) => item !== "All").map((specialty) => (
+                  <option key={specialty} value={specialty}>
+                    {specialty}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid gap-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Qualifications *</label>
               <input
-                placeholder="Rating"
-                type="number"
-                step="0.1"
-                value={doctorForm.rating}
+                placeholder="e.g. MBBS, MD (Cardiology)"
+                value={doctorForm.qualifications}
                 onChange={(event) =>
-                  setDoctorForm({ ...doctorForm, rating: Number(event.target.value) })
-                }
-                className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
-              />
-              <input
-                placeholder="Review count"
-                type="number"
-                value={doctorForm.reviewCount}
-                onChange={(event) =>
-                  setDoctorForm({ ...doctorForm, reviewCount: Number(event.target.value) })
+                  setDoctorForm({ ...doctorForm, qualifications: event.target.value })
                 }
                 className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
               />
             </div>
-            <input
-              placeholder="City"
-              value={doctorForm.city}
-              onChange={(event) => setDoctorForm({ ...doctorForm, city: event.target.value })}
-              className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
-            />
-            <input
-              placeholder="Photo URL"
-              value={doctorForm.photoUrl}
-              onChange={(event) => setDoctorForm({ ...doctorForm, photoUrl: event.target.value })}
-              className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
-            />
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-1">
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Experience (years)</label>
+                <input
+                  placeholder="e.g. 10"
+                  type="number"
+                  min={0}
+                  value={doctorForm.experience}
+                  onChange={(event) =>
+                    setDoctorForm({ ...doctorForm, experience: Number(event.target.value) })
+                  }
+                  className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
+                />
+              </div>
+              <div className="grid gap-1">
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Consultation Fee (INR)</label>
+                <input
+                  placeholder="e.g. 500"
+                  type="number"
+                  min={0}
+                  value={doctorForm.consultationFee}
+                  onChange={(event) =>
+                    setDoctorForm({ ...doctorForm, consultationFee: Number(event.target.value) })
+                  }
+                  className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
+                />
+              </div>
+              <div className="grid gap-1">
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Rating (0 – 5)</label>
+                <input
+                  placeholder="e.g. 4.5"
+                  type="number"
+                  step="0.1"
+                  min={0}
+                  max={5}
+                  value={doctorForm.rating}
+                  onChange={(event) =>
+                    setDoctorForm({ ...doctorForm, rating: Number(event.target.value) })
+                  }
+                  className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
+                />
+              </div>
+              <div className="grid gap-1">
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Reviews</label>
+                <input
+                  placeholder="e.g. 120"
+                  type="number"
+                  min={0}
+                  value={doctorForm.reviewCount}
+                  onChange={(event) =>
+                    setDoctorForm({ ...doctorForm, reviewCount: Number(event.target.value) })
+                  }
+                  className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
+                />
+              </div>
+            </div>
+            <div className="grid gap-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">City *</label>
               <input
-                type="checkbox"
-                checked={doctorForm.availableToday}
-                onChange={(event) =>
-                  setDoctorForm({ ...doctorForm, availableToday: event.target.checked })
-                }
+                placeholder="e.g. Mumbai"
+                value={doctorForm.city}
+                onChange={(event) => setDoctorForm({ ...doctorForm, city: event.target.value })}
+                className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
               />
-              Available today
-            </label>
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+            </div>
+            <div className="grid gap-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Photo URL <span className="normal-case font-normal text-slate-400">(optional — leave blank for default avatar)</span></label>
               <input
-                type="checkbox"
-                checked={doctorForm.isActive ?? true}
-                onChange={(event) =>
-                  setDoctorForm({ ...doctorForm, isActive: event.target.checked })
-                }
+                placeholder="https://example.com/doctor-photo.jpg"
+                value={doctorForm.photoUrl}
+                onChange={(event) => setDoctorForm({ ...doctorForm, photoUrl: event.target.value })}
+                className="min-h-12 rounded-xl border border-slate-300 px-4 py-3"
               />
-              Doctor active
-            </label>
+            </div>
+            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <label className="inline-flex cursor-pointer items-center gap-3 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={doctorForm.availableToday}
+                  onChange={(event) =>
+                    setDoctorForm({ ...doctorForm, availableToday: event.target.checked })
+                  }
+                  className="h-4 w-4 rounded"
+                />
+                <span><span className="font-semibold">Available today</span> — show the green "Available Today" badge on this doctor's card</span>
+              </label>
+              <label className="inline-flex cursor-pointer items-center gap-3 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={doctorForm.isActive ?? true}
+                  onChange={(event) =>
+                    setDoctorForm({ ...doctorForm, isActive: event.target.checked })
+                  }
+                  className="h-4 w-4 rounded"
+                />
+                <span><span className="font-semibold">Active</span> — uncheck to hide this doctor from the public listing</span>
+              </label>
+            </div>
             <Button onClick={submitDoctor}>
               {editingDoctorId ? "Update Doctor" : "Create Doctor"}
             </Button>

@@ -67,7 +67,7 @@ export function DoctorsPageSkeleton() {
         </header>
 
         <div className="mx-auto w-full max-w-[1440px] px-8 py-12 pt-[128px]">
-          <div className="mx-auto max-w-[1152px]">
+          <div>
             <Skeleton height={44} width={320} />
             <div className="mt-4">
               <Skeleton height={22} width="58%" count={2} />

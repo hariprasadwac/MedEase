@@ -22,7 +22,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         <div className="w-24 shrink-0 text-center">
           <div className="relative mx-auto h-20 w-20 overflow-hidden rounded-full border-4 border-blue-50">
             <Image
-              src={doctor.photoUrl}
+              src={doctor.photoUrl || "/doctor-placeholder.svg"}
               alt={doctor.name}
               fill
               sizes="80px"

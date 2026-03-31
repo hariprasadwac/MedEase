@@ -1,18 +1,14 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { format } from "date-fns";
 import {
   ArrowLeft,
   ArrowRight,
-  Bell,
   CalendarDays,
   Clock3,
-  Home,
   MapPin,
-  Search,
-  UserRound,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -34,6 +30,7 @@ import { cn } from "@/lib/utils";
 import type { Doctor, PatientDetails } from "@/types";
 
 const LAST_DOCTOR_ID_KEY = "medease-last-doctor-id";
+const patientDetailsKey = (id: string) => `medease-patient-${id}`;
 
 export function BookingPageClient() {
   const router = useRouter();
@@ -54,10 +51,10 @@ export function BookingPageClient() {
   const [slotError, setSlotError] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(true);
   const [slotCache, setSlotCache] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const patientDetailsLoadedRef = useRef(false);
 
   useEffect(() => {
     if (doctorId) {
@@ -107,7 +104,6 @@ export function BookingPageClient() {
     if (!doctor) {
       setSlotCache({});
       setAvailableSlots([]);
-      setLoadingSlots(false);
       return () => {
         active = false;
       };
@@ -207,18 +203,27 @@ export function BookingPageClient() {
     };
   }, [doctor, selectedDay, selectedSlot, slotCache]);
 
+  // Load saved patient details when doctor changes
   useEffect(() => {
-    function syncViewport() {
-      setIsDesktop(window.innerWidth >= 1024);
+    patientDetailsLoadedRef.current = false;
+    if (!resolvedDoctorId) {
+      setPatientDetails(createEmptyPatientDetails());
+      return;
     }
+    try {
+      const saved = window.localStorage.getItem(patientDetailsKey(resolvedDoctorId));
+      setPatientDetails(saved ? (JSON.parse(saved) as PatientDetails) : createEmptyPatientDetails());
+    } catch {
+      setPatientDetails(createEmptyPatientDetails());
+    }
+    patientDetailsLoadedRef.current = true;
+  }, [resolvedDoctorId]);
 
-    syncViewport();
-    window.addEventListener("resize", syncViewport);
-
-    return () => {
-      window.removeEventListener("resize", syncViewport);
-    };
-  }, []);
+  // Persist patient details whenever they change
+  useEffect(() => {
+    if (!resolvedDoctorId || !patientDetailsLoadedRef.current) return;
+    window.localStorage.setItem(patientDetailsKey(resolvedDoctorId), JSON.stringify(patientDetails));
+  }, [patientDetails, resolvedDoctorId]);
 
   if (loading || (doctor && selectedDay && loadingSlots && availableSlots.length === 0)) {
     return <BookingPageSkeleton />;
@@ -250,45 +255,37 @@ export function BookingPageClient() {
 
   return (
     <div className="min-h-screen bg-[#f7f9fb] text-[#191c1e]">
-      {isDesktop ? (
-        <header className="fixed inset-x-0 top-0 z-40 border-b border-[#f1f5f9] bg-white/80 backdrop-blur-[12px]">
-          <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-8">
-            <div className="flex items-center">
-              <Link
-                href="/doctors"
-                className="font-[family-name:var(--font-jakarta)] text-[24px] font-bold tracking-[-1.2px] text-[#1d4ed8]"
-              >
-                MedEase
-              </Link>
-            </div>
-          </div>
-        </header>
-      ) : (
-        <header className="fixed inset-x-0 top-0 z-40 border-b border-[#f1f5f9] bg-white/80 backdrop-blur-[12px]">
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center gap-3">
-              <button type="button" aria-label="Back to doctors" onClick={() => router.push("/doctors")}>
-                <ArrowLeft className="h-4 w-4 text-[#475569]" />
-              </button>
-              <p className="text-[18px] font-bold tracking-[-0.45px] text-[#1d4ed8]">MedEase</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <button type="button" aria-label="Location" className="text-[#1d4ed8]">
-                <MapPin className="h-5 w-5" />
-              </button>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0070ea] text-[10px] font-bold text-white">
-                JD
-              </div>
-            </div>
-          </div>
-        </header>
-      )}
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-[#f1f5f9] bg-white/80 backdrop-blur-[12px]">
+        {/* Desktop header */}
+        <div className="mx-auto hidden h-16 w-full max-w-[1440px] items-center px-8 lg:flex">
+          <Link
+            href="/doctors"
+            className="font-[family-name:var(--font-jakarta)] text-[24px] font-bold tracking-[-1.2px] text-[#1d4ed8]"
+          >
+            MedEase
+          </Link>
+        </div>
+        {/* Mobile header */}
+        <div className="flex items-center gap-3 px-6 py-4 lg:hidden">
+          <button
+            type="button"
+            aria-label="Go back"
+            onClick={() => {
+              if (currentStep > 1) setCurrentStep((currentStep - 1) as 1 | 2 | 3);
+              else router.push("/doctors");
+            }}
+          >
+            <ArrowLeft className="h-4 w-4 text-[#475569]" />
+          </button>
+          <p className="text-[18px] font-bold tracking-[-0.45px] text-[#1d4ed8]">MedEase</p>
+        </div>
+      </header>
 
-      <div className="mx-auto w-full max-w-[1440px] px-6 pb-28 pt-24 lg:px-8 lg:pb-16 lg:pt-28">
+      <div className="mx-auto w-full max-w-[1440px] px-6 pb-12 pt-24 lg:px-8 lg:pb-16 lg:pt-28">
         <div className="space-y-10">
           <StepIndicator currentStep={currentStep} />
 
-          {!isDesktop && currentStep === 1 ? (
+          {currentStep === 1 ? (
             <button
               type="button"
               onClick={() => {
@@ -299,7 +296,7 @@ export function BookingPageClient() {
 
                 setCurrentStep(2);
               }}
-              className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-[#0059bb] px-8 py-4 text-[16px] font-bold text-white shadow-[0_20px_25px_-5px_rgba(0,89,187,0.25),0_8px_10px_-6px_rgba(0,89,187,0.25)]"
+              className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-[#0059bb] px-8 py-4 text-[16px] font-bold text-white shadow-[0_20px_25px_-5px_rgba(0,89,187,0.25),0_8px_10px_-6px_rgba(0,89,187,0.25)] lg:hidden"
             >
               Continue
               <ArrowRight className="h-4 w-4" />
@@ -309,6 +306,7 @@ export function BookingPageClient() {
           <div className={cn("grid gap-8", currentStep === 1 && "lg:grid-cols-[minmax(0,1fr)_320px]")}>
             <motion.div
               key={currentStep}
+              className="min-w-0"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
@@ -381,15 +379,15 @@ export function BookingPageClient() {
               ) : null}
             </motion.div>
 
-            {currentStep === 1 && isDesktop ? (
-              <aside className="rounded-[32px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.05)] lg:sticky lg:top-28">
+            {currentStep === 1 ? (
+              <aside className="hidden rounded-[32px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.05)] lg:sticky lg:top-28 lg:block">
                 <h2 className="font-[family-name:var(--font-jakarta)] text-[20px] font-bold text-[#191c1e]">
                   Booking Summary
                 </h2>
                 <div className="mt-4 rounded-[20px] bg-[#f2f4f6] p-4">
                   <div className="flex items-center gap-3">
                     <div className="relative h-16 w-16 overflow-hidden rounded-[16px]">
-                      <Image src={doctor.photoUrl} alt={doctor.name} fill sizes="64px" className="object-cover" />
+                      <Image src={doctor.photoUrl || "/doctor-placeholder.svg"} alt={doctor.name} fill sizes="64px" className="object-cover" />
                     </div>
                     <div className="min-w-0">
                       <p className="font-[family-name:var(--font-jakarta)] text-[18px] font-bold text-[#191c1e]">
@@ -460,16 +458,6 @@ export function BookingPageClient() {
 
       <SuccessCheckmark open={bookingConfirmed} />
 
-      {!isDesktop ? (
-        <nav className="fixed inset-x-0 bottom-0 z-40 rounded-t-[32px] bg-white/90 px-4 pb-6 pt-3 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] backdrop-blur-[20px]">
-          <div className="flex items-center justify-between">
-            <BottomItem icon={<Home className="h-[18px] w-[18px]" />} label="Home" />
-            <BottomItem icon={<CalendarDays className="h-[18px] w-[18px]" />} label="Appointments" active />
-            <BottomItem icon={<Search className="h-[18px] w-[18px]" />} label="Search" />
-            <BottomItem icon={<UserRound className="h-[18px] w-[18px]" />} label="Profile" />
-          </div>
-        </nav>
-      ) : null}
     </div>
   );
 }
@@ -496,26 +484,3 @@ function SummaryRow({
   );
 }
 
-function BottomItem({
-  icon,
-  label,
-  active = false,
-}: {
-  icon: ReactNode;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <div className={cn("flex min-w-[72px] flex-col items-center rounded-2xl px-5 py-2", active && "bg-[#eff6ff]")}>
-      <span className={active ? "text-[#1d4ed8]" : "text-[#64748b]"}>{icon}</span>
-      <span
-        className={cn(
-          "mt-1 text-[11px] font-semibold uppercase tracking-[0.55px]",
-          active ? "text-[#1d4ed8]" : "text-[#64748b]",
-        )}
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
